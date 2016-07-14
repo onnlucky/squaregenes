@@ -11,6 +11,7 @@ mutate and find even better ways to stay around. Slowly life grows. And after a
 while, but inevitably, the simulator will be teeming with life.
 
 The thing to note, this simulator only provides a few things:
+
 1. an enviroment with rules
 2. an implementation of how genes are to be interpreted
 3. as genes ask for a copy, mutate the copy (how much depends on the ask)
