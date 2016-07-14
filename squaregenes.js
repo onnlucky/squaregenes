@@ -43,6 +43,7 @@ license: MIT
 var POW = 7 // world is a 2^POW sized, huge worlds eat a lot of cpu (8 or 9 works well)
 var SCALE = 3 // draw each part as a SCALExSCALE rectangle
 var ALLOW_MULTI_NEUCLEI = true // allow a single entity to have more then one neuclei
+var VERTICAL = false
 
 // **** setup the world ****
 var SIZE = Math.pow(2, POW)
@@ -688,9 +689,9 @@ function render(g) {
 
     g.fillStyle = "black"
     var line = ""
-    line += "update="+ _update +" (dur="+ _update_dur.toFixed(4) +") parts="+ allparts +" "
-    line += "entities="+ allentities +" (ever="+ totalentities +") "
-    line += "maxgen="+ maxgeneration +" oldest="+ maxalive +" largest="+ maxparts +" maxenergy="+ maxenergy.toFixed(1)
+    line += "t="+ _update +" (fps="+ (1/_update_dur).toFixed(1) +") parts="+ allparts +" "
+    line += "entities="+ allentities +" (died="+ (totalentities - allentities) +") "
+    line += "maxgen="+ maxgeneration +" oldest="+ maxalive +" largest="+ maxparts
     g.fillText(line, 5, SIZE * SCALE + 14)
 }
 
@@ -709,31 +710,43 @@ function cmdnames(cmd, signal) {
 }
 
 // render genome, highlighting the most hottest commands
+var showgenes = false
 function renderGeneTrace(g, neucleus) {
     if (!neucleus) return
 
     var genes = neucleus.genes
     var trace = neucleus.trace
 
-    g.strokeStyle = "grey"
     var x = SIZE * SCALE
     var y = 0
-    var seenbegin = true
+    var maxy = SIZE * SCALE
+    if (VERTICAL) {
+        x = 10
+        y = SIZE * SCALE + 30
+        maxy = y + SIZE * SCALE
+    }
+    if (!showgenes) { // first time, make sure we have space to show genes
+        showgenes = true
+        resize()
+    }
+
+    g.strokeStyle = "grey"
     for (var i = 0, il = genes.length; i < il;) {
         var cmd = genes[i]
         var signal = -1
         var t = trace? (trace[i]|0) : 0
         i += 1
-        if (cmd >= BEGIN) {
-            seenbegin = true
-        } else {
+        if (cmd < BEGIN) {
             i += 1
             signal = genes[i + 1]
         }
 
-        if (y + 16 > SIZE * SCALE) {
+        if (y + 16 > maxy) {
             y = 0
             x += 75
+            if (VERTICAL) {
+                y = SIZE * SCALE + 30
+            }
         }
         g.beginPath()
         g.rect(x, y, 70, 15)
@@ -745,6 +758,9 @@ function renderGeneTrace(g, neucleus) {
         } else if (cmd === BUILD) {
             g.lineWidth = 2
             g.strokeStyle = "green"
+        } else if (cmd >= BEGIN) {
+            g.lineWidth = 1
+            g.strokeStyle = "#DDD"
         } else {
             g.lineWidth = 1
             g.strokeStyle = "grey"
@@ -825,9 +841,17 @@ var g = null
 
 function resize() {
     if (!$canvas) return
-    $canvas.width = g.width = SCALE * SIZE + (SCALE * SIZE < 400? 5 * 75 : 3 * 75)
-    $canvas.height = g.height = SCALE * SIZE + 30
-    render(g)
+    var width = g.width = SCALE * SIZE
+    var height = g.height = SCALE * SIZE + 30
+    if (showgenes) {
+        if (!VERTICAL) {
+            width += SCALE * SIZE < 400? 5 * 75 : 3 * 75
+        } else {
+            height += SCALE * SIZE
+        }
+    }
+    $canvas.width = g.width = width
+    $canvas.height = g.height = height
 }
 
 window.onresize = resize
@@ -836,6 +860,7 @@ window.onload = function() {
     if (parent.getAttribute("size")) init(Number(parent.getAttribute("size"))|0)
     if (parent.getAttribute("scale")) SCALE = max(1, Number(parent.getAttribute("scale"))|0)
     if (parent.getAttribute("multi")) ALLOW_MULTI_NEUCLEI = JSON.parse(parent.getAttribute("multi").toLowerCase())
+    if (parent.getAttribute("vertical")) VERTICAL = JSON.parse(parent.getAttribute("vertical").toLowerCase())
     $canvas = document.createElement("canvas")
     g = $canvas.getContext("2d")
     g.font = "14px sans"
