@@ -872,6 +872,7 @@ var lastrender = 0
 every(0.001, function(){
     update(0.05)
 
+    if (!g) return
     var now = currentTime()
     if (now - lastrender > 0.05) {
         lastrender = now
