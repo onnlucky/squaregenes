@@ -38,3 +38,5 @@ see my blog post about this: http://leverlabs.io/blog20160714/
 
 * author: Onne Gorter
 * license: MIT
+
+![screenshot of life in action](screen.png)
