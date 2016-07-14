@@ -3,9 +3,9 @@
 A life simulator.
 
 As long as there are empty spaces, random genes are created, given a bit of
-energy, and a neucleus that decodes their instructions.
+energy, and a nucleus that decodes their instructions.
 
-For genes to stay around. They must copy themselves as all neuclei will die of
+For genes to stay around. They must copy themselves as all nuclei will die of
 old age eventually. To do that, they must find energy, or run out and starve.
 
 Most genes wont't make it. But few find a way. And with every copy perhaps
@@ -26,7 +26,7 @@ once. Parts of entities do not need to be fully connected, yet share all
 energy. (Again for speed.)
 
 Green parts harvest energy slowly from the environment. Red can eat green (and
-neuclei) and release energy quickly. Blue can eat red.
+nuclei) and release energy quickly. Blue can eat red.
 
 Usually over time, larger entities will learn to use red/blue as a defensive
 border. A cell wall if you like.
@@ -42,7 +42,7 @@ license: MIT
 
 var POW = 7 // world is a 2^POW sized, huge worlds eat a lot of cpu (8 or 9 works well)
 var SCALE = 3 // draw each part as a SCALExSCALE rectangle
-var ALLOW_MULTI_NEUCLEI = true // allow a single entity to have more then one neuclei
+var ALLOW_MULTI_NUCLEI = true // allow a single entity to have more then one nuclei
 var VERTICAL = false
 
 // **** setup the world ****
@@ -117,10 +117,10 @@ assert(evalIf(null, 5))
 const IF_PART = 0 // traverse entity, 0= if part at x+1, 1=y+1, ...; 4=x+1 but "if not"
 const IF_ENERGY = 1 // check if energy level is 0..3, or 4..7 for "if not"
 const IF_AGE = 2 // check if age is 0..3, or 4..7 for "if not"
-const IF_LEVEL = 3 // check if this is the intial neucleus, or later copy
+const IF_LEVEL = 3 // check if this is the intial nucleus, or later copy
 const ROTATE = 4 // rotate dir by, -2,-1,+1,+2, and/or flip rotate sign
 const BUILD = 5 // build a new part, if possible
-const SEED = 6 // duplicate/mutate current genes into independent neucleus
+const SEED = 6 // duplicate/mutate current genes into independent nucleus
 const BEGIN = 7 // start of a new gene, also stops current gene
 
 // POSSIBILITIES, NOT USED AT THE MOMENT
@@ -148,7 +148,7 @@ const KILL_COST = 0.3
 const GREEN_ENERGY_ADD = 0.75
 const FOOD_ENERGY_ADD = 4
 
-// entity has one or more parts, and at least one neucleus, it keeps track of energy and some statistics
+// entity has one or more parts, and at least one nucleus, it keeps track of energy and some statistics
 class Entity {
     constructor(energy, generation) {
         //assert(isNumber(energy))
@@ -156,7 +156,7 @@ class Entity {
         this.energy = energy
         this.maxenergy = 0
         this.parts = 0
-        this.neucleus = 0
+        this.nucleus = 0
         this.removed = false
         this.alive = 0
         this.generation = generation
@@ -168,12 +168,12 @@ class Entity {
         this.alive += 1
         //assert(isNumber(this.energy))
         //assert(isNumber(this.parts))
-        //assert(isNumber(this.neucleus))
+        //assert(isNumber(this.nucleus))
         this.maxenergy = this.parts * MAX_ENERGY
         if (this.energy > this.maxenergy) this.energy = this.maxenergy
 
         if (this.energy < 0) this.removed = true
-        if (this.neucleus <= 0) this.removed = true
+        if (this.nucleus <= 0) this.removed = true
         if (this.parts <= 0) this.removed = true
     }
 }
@@ -186,13 +186,13 @@ class Part {
         this.life = START_LIFE // every part has limited life
         this.removed = false
         this.entity.parts += 1
-        if (this instanceof Neucleus) this.entity.neucleus += 1
+        if (this instanceof Nucleus) this.entity.nucleus += 1
     }
 
     destroy() {
         if (this.removed) return
         this.entity.parts -= 1
-        if (this instanceof Neucleus) this.entity.neucleus -= 1
+        if (this instanceof Nucleus) this.entity.nucleus -= 1
         this.removed = true
     }
 
@@ -243,22 +243,22 @@ class Eater extends Part {
     }
 }
 
-// two kind of eaters, red eats green and neucleus, blue eats red
+// two kind of eaters, red eats green and nucleus, blue eats red
 class Red extends Eater { }
 class Blue extends Eater { }
 
-// neucleus is what has genes, evaluating them costs energy
-// it can inherit from another neucleus, in which case it copies properties like directionality
-class Neucleus extends Part {
-    constructor(coord, entity, genes, neucleus) {
+// nucleus is what has genes, evaluating them costs energy
+// it can inherit from another nucleus, in which case it copies properties like directionality
+class Nucleus extends Part {
+    constructor(coord, entity, genes, nucleus) {
         super(coord, entity)
         //assert(isArray(genes))
         this.genes = genes
         this.geneslength = genes.length
         this.life -= this.geneslength
-        this.level = neucleus? neucleus.level + 1 : 0
-        this.dir = neucleus? neucleus.dir : rndint(4)
-        this.sign = neucleus? neucleus.sign : rnditem([-1,1])
+        this.level = nucleus? nucleus.level + 1 : 0
+        this.dir = nucleus? nucleus.dir : rndint(4)
+        this.sign = nucleus? nucleus.sign : rnditem([-1,1])
         this.trace = null
         this.start = _update
     }
@@ -366,7 +366,7 @@ class Neucleus extends Part {
                     this.entity.energy -= energy
                     var genes = mutateGenes(this.genes, signal)
 
-                    var part = new Neucleus(coord2, new Entity(energy, this.entity.generation + 1), genes)
+                    var part = new Nucleus(coord2, new Entity(energy, this.entity.generation + 1), genes)
                     setPart(part)
                     break
             }
@@ -374,10 +374,10 @@ class Neucleus extends Part {
     }
 }
 
-// test neucleus working
+// test nucleus working
 (function() {
     var signal = 0 // signal 4..7 are the same as 0..3 but inverted
-    var n1 = new Neucleus(0, new Entity(START_ENERGY, 0), [])
+    var n1 = new Nucleus(0, new Entity(START_ENERGY, 0), [])
     assert(n1.getEnergySignal(0))
     assert(n1.getEnergySignal(1))
     assert(!n1.getEnergySignal(2))
@@ -413,21 +413,21 @@ class Neucleus extends Part {
     assert(n1.entity.parts === 1)
     n1.destroy()
     assert(n1.entity.parts === 0)
-    assert(n1.entity.neucleus === 0)
+    assert(n1.entity.nucleus === 0)
 })()
 
 // used by BUILD command, to evaluate if it can be build, and what the result is
-const NeucleusBuilder = {
+const NucleusBuilder = {
     name: "N",
     cost: NEW_PART_COST,
-    canBuild: function(selected, coord) { return ALLOW_MULTI_NEUCLEI && (selected || !getPart(coord)) },
-    build: function(coord, entity, neucleus) { return new Neucleus(coord, entity, mutateGenes(neucleus.genes, 0), neucleus) },
+    canBuild: function(selected, coord) { return ALLOW_MULTI_NUCLEI && (selected || !getPart(coord)) },
+    build: function(coord, entity, nucleus) { return new Nucleus(coord, entity, mutateGenes(nucleus.genes, 0), nucleus) },
 }
 const GreenBuilder = {
     name: "G",
     cost: NEW_PART_COST,
     canBuild: function(selected, coord) { return selected || !getPart(coord) },
-    build: function(coord, entity, neucleus) { return new Green(coord, entity) },
+    build: function(coord, entity, nucleus) { return new Green(coord, entity) },
 }
 const RedBuilder = {
     name: "R",
@@ -435,9 +435,9 @@ const RedBuilder = {
     canBuild: function(selected, coord) {
         if (selected) return false
         var part = getPart(coord)
-        return part instanceof Green || part instanceof Neucleus
+        return part instanceof Green || part instanceof Nucleus
     },
-    build: function(coord, entity, neucleus) { return new Red(coord, entity) },
+    build: function(coord, entity, nucleus) { return new Red(coord, entity) },
 }
 const BlueBuilder = {
     name: "B",
@@ -447,12 +447,12 @@ const BlueBuilder = {
         var part = getPart(coord)
         return part instanceof Red
     },
-    build: function(coord, entity, neucleus) { return new Blue(coord, entity) },
+    build: function(coord, entity, nucleus) { return new Blue(coord, entity) },
 }
 
 function getBuilderFor(signal) {
     switch (signal & 0x3) {
-        case 0: return NeucleusBuilder
+        case 0: return NucleusBuilder
         case 1: return GreenBuilder
         case 2: return RedBuilder
         case 3: return BlueBuilder
@@ -527,9 +527,9 @@ function randomEntity() {
     var coord = randomCoord()
     if (coord < 0) return
 
-    var part = new Neucleus(coord, new Entity(START_ENERGY, 0), randomGenes())
+    var part = new Nucleus(coord, new Entity(START_ENERGY, 0), randomGenes())
     part.entity.parts = 1
-    part.entity.neucleus = 1
+    part.entity.nucleus = 1
     setPart(part)
 }
 
@@ -549,9 +549,9 @@ function addEntity(genes) {
         return
     }
 
-    var part = new Neucleus(coord, new Entity(START_ENERGY, 0), genes)
+    var part = new Nucleus(coord, new Entity(START_ENERGY, 0), genes)
     part.entity.parts = 1
-    part.entity.neucleus = 1
+    part.entity.nucleus = 1
     setPart(part)
     console.log("added entity:", worldX(coord), worldY(coord), coord)
 }
@@ -607,7 +607,7 @@ function update(dt) {
     if (entity) {
         assert(isNumber(entity.energy))
         assert(isNumber(entity.parts))
-        assert(isNumber(entity.neucleus))
+        assert(isNumber(entity.nucleus))
     }
 
     for (var i = 0, il = removed.length; i < il; i++) {
@@ -647,7 +647,7 @@ function render(g) {
                 if (part instanceof Red) g.fillStyle = "#F88"
                 if (part instanceof Blue) g.fillStyle = "#88F"
                 //if (part instanceof Shell) g.fillStyle = "666"
-                if (part === highlightneucleus) g.fillStyle = "black"
+                if (part === highlightnucleus) g.fillStyle = "black"
                 g.fill()
                 g.stroke()
             } else {
@@ -663,7 +663,7 @@ function render(g) {
     g.lineWidth = 1.0
 
     if (highlightentity) {
-        renderGeneTrace(g, highlightneucleus)
+        renderGeneTrace(g, highlightnucleus)
 
         g.globalAlpha = 0.8
         g.strokeStyle = "black"
@@ -679,8 +679,8 @@ function render(g) {
         var w = g.measureText(text).width
         g.fillText(text, mousex - w/2, mousey + 18)
 
-        if (highlightneucleus && !highlightneucleus.removed) {
-            var text = "age="+ highlightneucleus.life +" level="+ highlightneucleus.level
+        if (highlightnucleus && !highlightnucleus.removed) {
+            var text = "age="+ highlightnucleus.life +" level="+ highlightnucleus.level
             var w = g.measureText(text).width
             g.fillText(text, mousex - w/2, mousey + 32)
         }
@@ -711,11 +711,11 @@ function cmdnames(cmd, signal) {
 
 // render genome, highlighting the most hottest commands
 var showgenes = false
-function renderGeneTrace(g, neucleus) {
-    if (!neucleus) return
+function renderGeneTrace(g, nucleus) {
+    if (!nucleus) return
 
-    var genes = neucleus.genes
-    var trace = neucleus.trace
+    var genes = nucleus.genes
+    var trace = nucleus.trace
 
     var x = SIZE * SCALE
     var y = 0
@@ -771,7 +771,7 @@ function renderGeneTrace(g, neucleus) {
         y += 16
     }
     g.lineWidth = 1
-    if (trace && !neucleus.removed) for (var i = 0, il = trace.length; i < il; i++) {
+    if (trace && !nucleus.removed) for (var i = 0, il = trace.length; i < il; i++) {
         var t = (trace[i]|0)
         trace[i] = (t - 8 - (t >> 3))|0
     }
@@ -781,46 +781,46 @@ var trace = new Array(500)
 var mousex = 0
 var mousey = 0
 var highlightentity = null
-var highlightneucleus = null
+var highlightnucleus = null
 window.onmousedown = function(event, x, y) {
     if (event.target !== $canvas) return
     mousex = event.offsetX || x || 0
     mousey = event.offsetY || y || 0
 
     highlightentity = null
-    if (highlightneucleus) highlightneucleus.trace = null
-    highlightneucleus = null
+    if (highlightnucleus) highlightnucleus.trace = null
+    highlightnucleus = null
     var part = WORLD[coordXY(mousex/SCALE, mousey/SCALE)]
     if (part) {
         highlightentity = part.entity
         var coord = part.coord
 
-        // search around for neucleus
-        if (part instanceof Neucleus) highlightneucleus = part
-        if (!highlightneucleus) {
+        // search around for nucleus
+        if (part instanceof Nucleus) highlightnucleus = part
+        if (!highlightnucleus) {
             part = getPart(move(coord, 0))
-            if (part instanceof Neucleus && part.entity === highlightentity) highlightneucleus = part
+            if (part instanceof Nucleus && part.entity === highlightentity) highlightnucleus = part
         }
-        if (!highlightneucleus) {
+        if (!highlightnucleus) {
             part = getPart(move(coord, 2))
-            if (part instanceof Neucleus && part.entity === highlightentity) highlightneucleus = part
+            if (part instanceof Nucleus && part.entity === highlightentity) highlightnucleus = part
         }
-        if (!highlightneucleus) {
+        if (!highlightnucleus) {
             part = getPart(move(coord, 1))
-            if (part instanceof Neucleus && part.entity === highlightentity) highlightneucleus = part
+            if (part instanceof Nucleus && part.entity === highlightentity) highlightnucleus = part
         }
-        if (!highlightneucleus) {
+        if (!highlightnucleus) {
             part = getPart(move(coord, 3))
-            if (part instanceof Neucleus && part.entity === highlightentity) highlightneucleus = part
+            if (part instanceof Nucleus && part.entity === highlightentity) highlightnucleus = part
         }
     }
 
-    console.log("entity:", highlightentity, "neucleus", highlightneucleus)
-    if (highlightneucleus) {
+    console.log("entity:", highlightentity, "nucleus", highlightnucleus)
+    if (highlightnucleus) {
         trace.length = 0
-        trace.length = highlightneucleus.genes.length
-        highlightneucleus.trace = trace
-        console.log("genes:", JSON.stringify(highlightneucleus.genes))
+        trace.length = highlightnucleus.genes.length
+        highlightnucleus.trace = trace
+        console.log("genes:", JSON.stringify(highlightnucleus.genes))
     }
 }
 
@@ -829,7 +829,6 @@ window.ontouchstart = function(event) {
     for (var i = 0; i < event.changedTouches.length; i++) {
         var touch = event.changedTouches[i]
         if (touch.target !== $canvas) continue
-        event.preventDefault()
         window.onmousedown(touch, touch.pageX - $canvas.offsetLeft, touch.pageY - $canvas.offsetTop)
     }
 }
@@ -859,7 +858,7 @@ window.onload = function() {
     var parent = document.getElementById("squaregenes") || document.body
     if (parent.getAttribute("size")) init(Number(parent.getAttribute("size"))|0)
     if (parent.getAttribute("scale")) SCALE = max(1, Number(parent.getAttribute("scale"))|0)
-    if (parent.getAttribute("multi")) ALLOW_MULTI_NEUCLEI = JSON.parse(parent.getAttribute("multi").toLowerCase())
+    if (parent.getAttribute("multi")) ALLOW_MULTI_NUCLEI = JSON.parse(parent.getAttribute("multi").toLowerCase())
     if (parent.getAttribute("vertical")) VERTICAL = JSON.parse(parent.getAttribute("vertical").toLowerCase())
     $canvas = document.createElement("canvas")
     g = $canvas.getContext("2d")

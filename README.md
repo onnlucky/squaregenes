@@ -1,9 +1,9 @@
 # Square Genes - A Life Simulator
 
 As long as there are empty spaces, random genes are created, given a bit of
-energy, and a neucleus that decodes their instructions.
+energy, and a nucleus that decodes their instructions.
 
-For genes to stay around. They must copy themselves as all neuclei will die of
+For genes to stay around. They must copy themselves as all nuclei will die of
 old age eventually. To do that, they must find energy, or run out and starve.
 
 Most genes wont't make it. But few find a way. And with every copy perhaps
@@ -24,7 +24,7 @@ once. Parts of entities do not need to be fully connected, yet share all
 energy. (Again for speed.)
 
 Green parts harvest energy slowly from the environment. Red can eat green (and
-neuclei) and release energy quickly. Blue can eat red.
+nuclei) and release energy quickly. Blue can eat red.
 
 Usually over time, larger entities will learn to use red/blue as a defensive
 border. A cell wall if you like.
