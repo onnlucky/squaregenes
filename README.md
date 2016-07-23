@@ -6,21 +6,21 @@ energy, and a nucleus that decodes their instructions.
 For genes to stay around. They must copy themselves as all nuclei will die of
 old age eventually. To do that, they must find energy, or run out and starve.
 
-Most genes wont't make it. But few find a way. And with every copy perhaps
+Most genes won't make it. But few find a way. And with every copy perhaps
 mutate and find even better ways to stay around. Slowly life grows. And after a
 while, but inevitably, the simulator will be teeming with life.
 
 The thing to note, this simulator only provides a few things:
 
-1. an enviroment with rules
+1. an environment with rules
 2. an implementation of how genes are to be interpreted
 3. as genes ask for a copy, mutate the copy (how much depends on the ask)
-4. on empy spaces, create random genes with some energy
+4. on empty spaces, create random genes with some energy
 
 From there genes are on their own. Natural selection emerges because genes
 might copy. And only those that do, and do well, stay around.
 
-The system uses squares, so that it can simulate many parts and many genes at
+The system uses squares so that it can simulate many parts and many genes at
 once. Parts of entities do not need to be fully connected, yet share all
 energy. (Again for speed.)
 
